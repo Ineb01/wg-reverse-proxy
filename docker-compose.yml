@@ -1,25 +1,43 @@
 services:
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "11434:11434"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./certbot/www:/var/www/certbot:ro
-      - ./certbot/conf:/etc/letsencrypt:ro
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
     restart: unless-stopped
-
-  certbot:
-    image: certbot/certbot
+    security_opt:
+      - no-new-privileges:true
     ports:
       - "80:80"
+      - "443:443"
     volumes:
-      - ./certbot/www:/var/www/certbot
-      - ./certbot/conf:/etc/letsencrypt
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h; done;'"
-    restart: unless-stopped
-
-# Commands to get certificates:
-# sudo docker compose run --rm certbot certonly --webroot -w /var/www/certbot -d ollama.wg.dphx.eu
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./data/traefik/config:/etc/traefik/config
+      - ./data/traefik/certificates:/etc/traefik/certificates
+      - ./data/traefik/acme:/etc/traefik/acme
+    command:
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.file.directory=/etc/traefik/config"
+      - "--providers.file.watch=true"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--certificatesresolvers.letsencrypt.acme.email=your-email@example.com"  # Replace with your email
+      - "--certificatesresolvers.letsencrypt.acme.storage=/etc/traefik/acme/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.wg.dphx.eu`)"  # Optional: dashboard access
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.routers.traefik.entrypoints=websecure"
+      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
+      
+      # Configuration for the ollama backend
+      - "traefik.http.routers.ollama.rule=Host(`ollama.wg.dphx.eu`)"
+      - "traefik.http.routers.ollama.entrypoints=websecure"
+      - "traefik.http.routers.ollama.tls=true"
+      - "traefik.http.routers.ollama.tls.certresolver=letsencrypt"
+      - "traefik.http.services.ollama.loadbalancer.server.url=http://192.168.0.102:11434"

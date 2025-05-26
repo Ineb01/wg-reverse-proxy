@@ -1,0 +1,15 @@
+http:
+  services:
+    ollama:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.0.102:11434"
+
+  routers:
+    ollama:
+      rule: "Host(`ollama.wg.dphx.eu`)"
+      service: "ollama"
+      entryPoints:
+        - "websecure"
+      tls:
+        certResolver: letsencrypt
