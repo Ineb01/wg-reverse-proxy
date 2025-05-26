@@ -18,7 +18,7 @@ cd wg-reverse-proxy
 Start the Nginx and Certbot containers:
 
 ```bash
-docker-compose up -d
+sudo docker compose up -d
 ```
 
 ### 3. Obtain SSL Certificate
@@ -26,13 +26,13 @@ docker-compose up -d
 To get a certificate for ollama.wg.dphx.eu:
 
 ```bash
-docker-compose run --rm certbot certonly --webroot -w /var/www/certbot -d ollama.wg.dphx.eu
+sudo docker compose run --rm certbot certonly --webroot -w /var/www/certbot -d ollama.wg.dphx.eu
 ```
 
 For multiple subdomains:
 
 ```bash
-docker-compose run --rm certbot certonly --webroot -w /var/www/certbot -d subdomain1.wg.dphx.eu -d subdomain2.wg.dphx.eu
+sudo docker compose run --rm certbot certonly --webroot -w /var/www/certbot -d subdomain1.wg.dphx.eu -d subdomain2.wg.dphx.eu
 ```
 
 Note: For the wildcard certificate, you'll need to create TXT records in your DNS configuration when prompted.
@@ -42,7 +42,7 @@ Note: For the wildcard certificate, you'll need to create TXT records in your DN
 After obtaining certificates, restart Nginx to apply the changes:
 
 ```bash
-docker-compose restart nginx
+sudo docker compose restart nginx
 ```
 
 ## Configuration
