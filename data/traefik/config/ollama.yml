@@ -1,4 +1,13 @@
 http:
+  middlewares:
+    ipwhitelist:
+      ipWhiteList:
+        # Add your allowed IP addresses here (examples below)
+        sourceRange:
+          - "127.0.0.1/32"          # localhost
+          - "192.168.0.0/16"        # local network
+          - "130.61.107.184/32"     # OCI instance
+
   services:
     ollama:
       loadBalancer:
@@ -11,5 +20,7 @@ http:
       service: "ollama"
       entryPoints:
         - "websecure"
+      middlewares:
+        - "ipwhitelist"
       tls:
         certResolver: letsencrypt
