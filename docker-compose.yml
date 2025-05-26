@@ -34,7 +34,7 @@ services:
       - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
       
       # Ollama service configuration
-      - "traefik.http.services.ollama.loadbalancer.servers.url=http://192.168.0.102:11434"
+      - "traefik.http.services.ollama.loadbalancer.servers.0.url=http://192.168.0.102:11434"
       
       # Ollama router configuration
       - "traefik.http.routers.ollama.rule=Host(`ollama.wg.dphx.eu`)"
