@@ -12,10 +12,14 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./data/traefik/certificates:/etc/traefik/certificates
       - ./data/traefik/acme:/etc/traefik/acme
+      - ./data/traefik/config:/etc/traefik/config
     command:
+      - "--log.level=DEBUG"  # Enable debug logging
       - "--api.dashboard=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
+      - "--providers.file.directory=/etc/traefik/config"
+      - "--providers.file.watch=true"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
@@ -33,12 +37,5 @@ services:
       - "traefik.http.routers.traefik.tls=true"
       - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
       
-      # Ollama service configuration
-      - "traefik.http.services.ollama.loadbalancer.servers.0.url=http://192.168.0.102:11434"
-      
-      # Ollama router configuration
-      - "traefik.http.routers.ollama.rule=Host(`ollama.wg.dphx.eu`)"
-      - "traefik.http.routers.ollama.service=ollama"
-      - "traefik.http.routers.ollama.entrypoints=websecure"
-      - "traefik.http.routers.ollama.tls=true"
-      - "traefik.http.routers.ollama.tls.certresolver=letsencrypt"
+      # Remove the problematic Ollama service configuration using Docker provider
+      # We'll use a file provider instead
