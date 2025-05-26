@@ -10,15 +10,12 @@ services:
       - "443:443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./data/traefik/config:/etc/traefik/config
       - ./data/traefik/certificates:/etc/traefik/certificates
       - ./data/traefik/acme:/etc/traefik/acme
     command:
       - "--api.dashboard=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-      - "--providers.file.directory=/etc/traefik/config"
-      - "--providers.file.watch=true"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
@@ -27,3 +24,21 @@ services:
       - "--certificatesresolvers.letsencrypt.acme.storage=/etc/traefik/acme/acme.json"
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+    labels:
+      - "traefik.enable=true"
+      # Traefik dashboard configuration
+      - "traefik.http.routers.traefik.rule=Host(`traefik.wg.dphx.eu`)"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.routers.traefik.entrypoints=websecure"
+      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
+      
+      # Ollama service configuration
+      - "traefik.http.services.ollama.loadbalancer.servers.url=http://192.168.0.102:11434"
+      
+      # Ollama router configuration
+      - "traefik.http.routers.ollama.rule=Host(`ollama.wg.dphx.eu`)"
+      - "traefik.http.routers.ollama.service=ollama"
+      - "traefik.http.routers.ollama.entrypoints=websecure"
+      - "traefik.http.routers.ollama.tls=true"
+      - "traefik.http.routers.ollama.tls.certresolver=letsencrypt"
