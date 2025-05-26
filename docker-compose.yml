@@ -15,7 +15,7 @@ services:
       - ./data/traefik/config:/etc/traefik/config
     command:
       - "--log.level=DEBUG"  # Enable debug logging
-      - "--api.dashboard=true"
+      - "--api.dashboard=false"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--providers.file.directory=/etc/traefik/config"
@@ -28,14 +28,3 @@ services:
       - "--certificatesresolvers.letsencrypt.acme.storage=/etc/traefik/acme/acme.json"
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
-    labels:
-      - "traefik.enable=true"
-      # Traefik dashboard configuration
-      - "traefik.http.routers.traefik.rule=Host(`traefik.wg.dphx.eu`)"
-      - "traefik.http.routers.traefik.service=api@internal"
-      - "traefik.http.routers.traefik.entrypoints=websecure"
-      - "traefik.http.routers.traefik.tls=true"
-      - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
-      
-      # Remove the problematic Ollama service configuration using Docker provider
-      # We'll use a file provider instead
