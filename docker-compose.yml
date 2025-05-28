@@ -43,10 +43,10 @@ services:
     restart: unless-stopped
     depends_on:
       - guacd
-      - mysql
+      - mariadb
     environment:
       - GUACD_HOSTNAME=guacd
-      - MYSQL_HOSTNAME=mysql
+      - MYSQL_HOSTNAME=mariadb
       - MYSQL_PORT=3306
       - MYSQL_DATABASE=guacamole_db
       - MYSQL_USER=guacamole_user
@@ -60,9 +60,9 @@ services:
       - "traefik.http.middlewares.guacamole-prefix.stripprefix.prefixes=/guacamole"
       - "traefik.http.routers.guacamole.middlewares=guacamole-ipwhitelist@file,guacamole-prefix"
 
-  mysql:
-    image: mysql:5.7
-    container_name: mysql
+  mariadb:
+    image: mariadb:10.5
+    container_name: mariadb
     restart: unless-stopped
     environment:
       - MYSQL_ROOT_PASSWORD=root_password
