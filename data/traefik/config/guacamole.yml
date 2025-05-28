@@ -1,0 +1,26 @@
+http:
+  middlewares:
+    guacamole-ipwhitelist:
+      ipWhiteList:
+        # Same IP whitelist as ollama configuration
+        sourceRange:
+          - "127.0.0.1/32"          # localhost
+          - "192.168.0.0/16"        # local network
+          - "130.61.107.184/32"     # OCI instance
+
+  services:
+    guacamole:
+      loadBalancer:
+        servers:
+          - url: "http://guacamole:8080/guacamole/"  # Using Docker service name + default Guacamole path
+
+  routers:
+    guacamole:
+      rule: "Host(`guacamole.wg.dphx.eu`)"
+      service: "guacamole"
+      entryPoints:
+        - "websecure"
+      middlewares:
+        - "guacamole-ipwhitelist"
+      tls:
+        certResolver: letsencrypt

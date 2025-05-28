@@ -28,3 +28,28 @@ services:
       - "--certificatesresolvers.letsencrypt.acme.storage=/etc/traefik/acme/acme.json"
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+
+  guacamole:
+    image: guacamole/guacamole
+    container_name: guacamole
+    restart: unless-stopped
+    environment:
+      - GUACAMOLE_HOME=/config
+      - MYSQL_HOST=guacd
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=guacamole_db
+      - MYSQL_USER=guacamole_user
+      - MYSQL_PASSWORD=guacamole_password
+    volumes:
+      - ./data/guacamole/config:/config
+  mysql:
+    image: mysql:5.7
+    container_name: guacamole-mysql
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=root_password
+      - MYSQL_DATABASE=guacamole_db
+      - MYSQL_USER=guacamole_user
+      - MYSQL_PASSWORD=guacamole_password
+    volumes:
+      - ./data/mysql:/var/lib/mysql
