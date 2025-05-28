@@ -30,7 +30,7 @@ services:
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
 
   guacamole:
-    image: guacamole/guacamole
+    image: guacamole/guacamole:1.6.0-RC1
     container_name: guacamole
     restart: unless-stopped
     environment:
@@ -43,7 +43,7 @@ services:
     volumes:
       - ./data/guacamole/config:/config
   mysql:
-    image: mysql:5.7
+    image: mysql:9.3.0
     container_name: guacamole-mysql
     restart: unless-stopped
     environment:
