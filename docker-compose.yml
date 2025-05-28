@@ -29,22 +29,40 @@ services:
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
 
+  guacd:
+    image: guacamole/guacd:1.6.0-RC1
+    container_name: guacd
+    restart: unless-stopped
+    volumes:
+      - ./data/guacd/recordings:/recordings
+      - ./data/guacd/drive:/drive
+
   guacamole:
     image: guacamole/guacamole:1.6.0-RC1
     container_name: guacamole
     restart: unless-stopped
+    depends_on:
+      - guacd
+      - mysql
     environment:
-      - GUACAMOLE_HOME=/config
-      - MYSQL_HOST=guacd
+      - GUACD_HOSTNAME=guacd
+      - MYSQL_HOSTNAME=mysql
       - MYSQL_PORT=3306
       - MYSQL_DATABASE=guacamole_db
       - MYSQL_USER=guacamole_user
       - MYSQL_PASSWORD=guacamole_password
-    volumes:
-      - ./data/guacamole/config:/config
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.guacamole.rule=Host(`guacamole.wg.dphx.eu`)"
+      - "traefik.http.routers.guacamole.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.guacamole.entrypoints=websecure"
+      - "traefik.http.services.guacamole.loadbalancer.server.port=8080"
+      - "traefik.http.middlewares.guacamole-prefix.stripprefix.prefixes=/guacamole"
+      - "traefik.http.routers.guacamole.middlewares=guacamole-ipwhitelist@file,guacamole-prefix"
+
   mysql:
-    image: mysql:9.3.0
-    container_name: guacamole-mysql
+    image: mysql:5.7
+    container_name: mysql
     restart: unless-stopped
     environment:
       - MYSQL_ROOT_PASSWORD=root_password
