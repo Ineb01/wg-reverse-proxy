@@ -46,7 +46,6 @@ services:
     depends_on:
       - guacd
       - mariadb
-      - init-db
     environment:
       - GUACD_HOSTNAME=guacd
       - MYSQL_HOSTNAME=mariadb
