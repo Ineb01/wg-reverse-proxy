@@ -5,7 +5,7 @@ http:
     dashboard-auth:
       basicAuth:
         users:
-          - "admin:$apr1$ruca84Hq$mbjdMZBAG.KWn7vfN/SNK/" # password is 'admin'
+          - "admin:$apr1$0UwD3hxv$IXdLckRXMYWZHG9dtuz8G." # password is 'admin'
     
     # Redirect for dashboard root
     dashboard-redirect:
