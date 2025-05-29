@@ -15,7 +15,7 @@ services:
       - ./data/traefik/config:/etc/traefik/config
     command:
       - "--log.level=DEBUG"  # Enable debug logging
-      - "--api.dashboard=false"
+      - "--api.dashboard=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--providers.file.directory=/etc/traefik/config"
