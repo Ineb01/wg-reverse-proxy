@@ -1,0 +1,100 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: traefik-dashboard
+  namespace: wg-proxy
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    # Optional security annotations
+    nginx.ingress.kubernetes.io/whitelist-source-range: "130.61.107.184/32,192.168.0.0/16,172.16.0.0/12"
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: traefik-dashboard-auth
+spec:
+  tls:
+  - hosts:
+    - traefik.wg.dphx.eu
+    secretName: traefik-dashboard-tls
+  rules:
+  - host: traefik.wg.dphx.eu
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: traefik
+            port:
+              number: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: guacamole
+  namespace: wg-proxy
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    # Optional security annotations
+    nginx.ingress.kubernetes.io/whitelist-source-range: "130.61.107.184/32,192.168.0.0/16,172.16.0.0/12"
+spec:
+  tls:
+  - hosts:
+    - guacamole.wg.dphx.eu
+    secretName: guacamole-tls
+  rules:
+  - host: guacamole.wg.dphx.eu
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: guacamole
+            port:
+              number: 8080
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: traefik-dashboard-auth
+  namespace: wg-proxy
+type: Opaque
+data:
+  auth: YWRtaW46JGFwcjEkMFV3RDNoeHYkSVhkTGNrUlhNWVdaSEc5ZHR1ejhHLg==  # admin:admin - replace with your secure credentials
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik
+  namespace: wg-proxy
+spec:
+  ports:
+    - name: web
+      port: 80
+      targetPort: 80
+    - name: websecure
+      port: 443
+      targetPort: 443
+    - name: admin
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: traefik
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: guacamole
+  namespace: wg-proxy
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: guacamole
+  type: ClusterIP
