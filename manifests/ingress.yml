@@ -15,10 +15,10 @@ metadata:
 spec:
   tls:
   - hosts:
-    - traefik.wg.dphx.eu
+    - traefik.cluster.dphx.eu
     secretName: traefik-dashboard-tls
   rules:
-  - host: traefik.wg.dphx.eu
+  - host: traefik.cluster.dphx.eu
     http:
       paths:
       - path: /
@@ -43,10 +43,10 @@ metadata:
 spec:
   tls:
   - hosts:
-    - guacamole.wg.dphx.eu
+    - guacamole.cluster.dphx.eu
     secretName: guacamole-tls
   rules:
-  - host: guacamole.wg.dphx.eu
+  - host: guacamole.cluster.dphx.eu
     http:
       paths:
       - path: /
