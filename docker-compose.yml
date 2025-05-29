@@ -46,6 +46,7 @@ services:
     depends_on:
       - guacd
       - mariadb
+      - init-db
     environment:
       - GUACD_HOSTNAME=guacd
       - MYSQL_HOSTNAME=mariadb
@@ -68,3 +69,24 @@ services:
       - MYSQL_PASSWORD=guacamole_password
     volumes:
       - ./data/mysql:/var/lib/mysql
+
+  # Database initialization service
+  init-db:
+    image: jwilder/dockerize
+    container_name: guacamole-init-db
+    depends_on:
+      - mariadb
+    command: >
+      -wait tcp://mariadb:3306
+      -timeout 60s
+      /bin/sh -c "
+      if [ ! -f /init-complete ]; then
+        echo 'Initializing Guacamole database...';
+        /bin/sh /init-guacamole-db.sh;
+        touch /init-complete;
+      else
+        echo 'Database already initialized, skipping...';
+      fi"
+    volumes:
+      - ./init-guacamole-db.sh:/init-guacamole-db.sh
+      - ./data/.init-complete:/init-complete
