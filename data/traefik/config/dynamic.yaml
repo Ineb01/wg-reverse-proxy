@@ -41,7 +41,7 @@ http:
     guacamole:
       loadBalancer:
         servers:
-          - url: "http://guacamole:8080/guacamole/"
+          - url: "http://guacamole:8080/"
 
   # --- Router Definitions ---
   routers:
