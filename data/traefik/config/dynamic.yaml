@@ -1,0 +1,25 @@
+http:
+  middlewares:
+    dashboard-auth:
+      basicAuth:
+        users:
+          - "admin:$apr1$ruca84Hq$mbjdMZBAG.KWn7vfN/SNK/" # password is 'admin'
+  
+  # Additional configuration to check for troubleshooting
+  routers:
+    dashboard-check:
+      rule: "Host(`traefik.wg.dphx.eu`) && Path(`/`)"
+      service: api@internal
+      entrypoints:
+        - websecure
+      tls:
+        certResolver: letsencrypt
+      middlewares:
+        - dashboard-redirect
+
+  middlewares:
+    dashboard-redirect:
+      redirectRegex:
+        regex: "^https://traefik.wg.dphx.eu/$"
+        replacement: "https://traefik.wg.dphx.eu/dashboard/"
+        permanent: true

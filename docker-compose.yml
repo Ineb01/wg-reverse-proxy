@@ -30,11 +30,10 @@ services:
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.dashboard.rule=Host(`traefik.wg.dphx.eu`)"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.wg.dphx.eu`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
       - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.http.routers.dashboard.entrypoints=websecure"
       - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.dashboard.middlewares=dashboard-auth@file"
 
   guacd:
     image: guacamole/guacd:1.6.0-RC1
