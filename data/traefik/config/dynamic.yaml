@@ -71,7 +71,6 @@ http:
         - websecure
       middlewares:
         - trusted-ip-whitelist
-        - guacamole-prefix
       tls:
         certResolver: letsencrypt
 
