@@ -30,10 +30,6 @@ services:
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.dashboard.rule=Host(`traefik.wg.dphx.eu`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
-      - "traefik.http.routers.dashboard.service=api@internal"
-      - "traefik.http.routers.dashboard.entrypoints=websecure"
-      - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
 
   guacd:
     image: guacamole/guacd:1.6.0-RC1
@@ -59,12 +55,7 @@ services:
       - MYSQL_PASSWORD=guacamole_password
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.guacamole.rule=Host(`guacamole.wg.dphx.eu`)"
-      - "traefik.http.routers.guacamole.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.guacamole.entrypoints=websecure"
       - "traefik.http.services.guacamole.loadbalancer.server.port=8080"
-      - "traefik.http.middlewares.guacamole-prefix.stripprefix.prefixes=/guacamole"
-      - "traefik.http.routers.guacamole.middlewares=guacamole-ipwhitelist@file,guacamole-prefix"
 
   mariadb:
     image: mariadb:10.5

@@ -1,12 +1,63 @@
 http:
+  # --- Common Middlewares ---
   middlewares:
+    # Authentication middleware for dashboard
     dashboard-auth:
       basicAuth:
         users:
           - "admin:$apr1$ruca84Hq$mbjdMZBAG.KWn7vfN/SNK/" # password is 'admin'
-  
-  # Additional configuration to check for troubleshooting
+    
+    # Redirect for dashboard root
+    dashboard-redirect:
+      redirectRegex:
+        regex: "^https://traefik.wg.dphx.eu/$"
+        replacement: "https://traefik.wg.dphx.eu/dashboard/"
+        permanent: true
+    
+    # Common IP whitelist for protected services
+    trusted-ip-whitelist:
+      ipWhiteList:
+        sourceRange:
+          - "127.0.0.1/32"          # localhost
+          - "192.168.0.0/16"        # local network
+          - "172.16.0.0/12"         # docker network
+          - "130.61.107.184/32"     # OCI instance
+    
+    # Strip prefix middleware for Guacamole
+    guacamole-prefix:
+      stripPrefix:
+        prefixes: 
+          - "/guacamole"
+
+  # --- Service Definitions ---
+  services:
+    # Ollama API service
+    ollama:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.0.102:11434"
+
+    # Guacamole service (already defined in docker-compose with loadbalancer.server.port)
+    guacamole:
+      loadBalancer:
+        servers:
+          - url: "http://guacamole:8080/guacamole/"
+
+  # --- Router Definitions ---
   routers:
+    # Traefik Dashboard
+    dashboard:
+      rule: "Host(`traefik.wg.dphx.eu`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
+      service: api@internal
+      entrypoints:
+        - websecure
+      tls:
+        certResolver: letsencrypt
+      middlewares:
+        - dashboard-auth
+        - trusted-ip-whitelist
+
+    # Dashboard root path redirect
     dashboard-check:
       rule: "Host(`traefik.wg.dphx.eu`) && Path(`/`)"
       service: api@internal
@@ -16,10 +67,27 @@ http:
         certResolver: letsencrypt
       middlewares:
         - dashboard-redirect
+        - trusted-ip-whitelist
 
-  middlewares:
-    dashboard-redirect:
-      redirectRegex:
-        regex: "^https://traefik.wg.dphx.eu/$"
-        replacement: "https://traefik.wg.dphx.eu/dashboard/"
-        permanent: true
+    # Guacamole Router
+    guacamole:
+      rule: "Host(`guacamole.wg.dphx.eu`)"
+      service: guacamole
+      entryPoints:
+        - websecure
+      middlewares:
+        - trusted-ip-whitelist
+        - guacamole-prefix
+      tls:
+        certResolver: letsencrypt
+
+    # Ollama Router
+    ollama:
+      rule: "Host(`ollama.wg.dphx.eu`)"
+      service: ollama
+      entryPoints:
+        - websecure
+      middlewares:
+        - trusted-ip-whitelist
+      tls:
+        certResolver: letsencrypt
