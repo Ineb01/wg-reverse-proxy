@@ -23,12 +23,6 @@ http:
           - "172.16.0.0/12"         # docker network
           - "130.61.107.184/32"     # OCI instance
     
-    # Strip prefix middleware for Guacamole
-    guacamole-prefix:
-      stripPrefix:
-        prefixes: 
-          - "/guacamole"
-
   # --- Service Definitions ---
   services:
     # Ollama API service
