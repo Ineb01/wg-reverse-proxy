@@ -15,7 +15,7 @@ http:
     guacamole-sslheader:
       headers:
         customrequestheaders:
-          - "X-Forwarded-Proto=https"
+          X-Forwarded-Proto: "https"
     
     # Redirect for dashboard root
     dashboard-redirect:
