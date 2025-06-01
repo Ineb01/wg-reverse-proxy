@@ -6,6 +6,16 @@ http:
       basicAuth:
         users:
           - "admin:$apr1$0UwD3hxv$IXdLckRXMYWZHG9dtuz8G." # password is 'admin'
+
+    
+    guacamole-prefix:
+      addprefix:
+        prefix: "/guacamole"
+    
+    guacamole-sslheader:
+      headers:
+        customrequestheaders:
+          - "X-Forwarded-Proto=https"
     
     # Redirect for dashboard root
     dashboard-redirect:
@@ -71,6 +81,8 @@ http:
         - websecure
       middlewares:
         - trusted-ip-whitelist
+        - guacamole-prefix
+        - guacamole-sslheader
       tls:
         certResolver: letsencrypt
 

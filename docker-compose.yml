@@ -55,10 +55,7 @@ services:
       - MYSQL_PASSWORD=guacamole_password
     labels:
       - "traefik.enable=true"
-      - "traefik.http.services.guacamole.loadbalancer.server.port=8080"
-      - "traefik.http.middlewares.guacamole-prefix.addprefix.prefix=/guacamole"
-      - "traefik.http.middlewares.guacamole-sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
-      - "traefik.http.routers.guacamole.middlewares=guacamole-prefix,guacamole-sslheader"
+
 
   mariadb:
     image: mariadb:10.5
