@@ -34,41 +34,41 @@ services:
       - "traefik.http.routers.dashboard.middlewares=dashboard-auth"
       - "traefik.http.middlewares.dashboard-auth.basicauth.users=admin:$$apr1$$0UwD3hxv$$IXdLckRXMYWZHG9dtuz8G."
 
-  guacd:
-    image: guacamole/guacd:1.6.0-RC1
-    container_name: guacd
-    restart: unless-stopped
-    volumes:
-      - ./data/guacd/recordings:/recordings
-      - ./data/guacd/drive:/drive
-    networks:
-      - proxy
-
-  guacamole:
-    image: guacamole/guacamole:1.6.0-RC1
-    container_name: guacamole
-    restart: unless-stopped
-    depends_on:
-      - guacd
-      - shared_db
-    environment:
-      - GUACD_HOSTNAME=guacd
-      - MYSQL_HOSTNAME=shared_db
-      - MYSQL_PORT=3306
-      - MYSQL_DATABASE=guacamole_db
-      - MYSQL_USER=guacamole_user
-      - MYSQL_PASSWORD=guacamole_password
-    networks:
-      - proxy
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.guacamole.rule=Host(`guacamole.wg.dphx.eu`)"
-      - "traefik.http.routers.guacamole.entrypoints=websecure"
-      - "traefik.http.routers.guacamole.tls.certresolver=letsencrypt"
-      - "traefik.http.services.guacamole.loadbalancer.server.port=8080"
-      - "traefik.http.routers.guacamole.middlewares=guacamole-prefix,guacamole-headers"
-      - "traefik.http.middlewares.guacamole-prefix.addprefix.prefix=/guacamole"
-      - "traefik.http.middlewares.guacamole-headers.headers.customrequestheaders.X-Forwarded-Proto=https"
+#  guacd:
+#    image: guacamole/guacd:1.6.0-RC1
+#    container_name: guacd
+#    restart: unless-stopped
+#    volumes:
+#      - ./data/guacd/recordings:/recordings
+#      - ./data/guacd/drive:/drive
+#    networks:
+#      - proxy
+#
+#  guacamole:
+#    image: guacamole/guacamole:1.6.0-RC1
+#    container_name: guacamole
+#    restart: unless-stopped
+#    depends_on:
+#      - guacd
+#      - shared_db
+#    environment:
+#      - GUACD_HOSTNAME=guacd
+#      - MYSQL_HOSTNAME=shared_db
+#      - MYSQL_PORT=3306
+#      - MYSQL_DATABASE=guacamole_db
+#      - MYSQL_USER=guacamole_user
+#      - MYSQL_PASSWORD=guacamole_password
+#    networks:
+#      - proxy
+#    labels:
+#      - "traefik.enable=true"
+#      - "traefik.http.routers.guacamole.rule=Host(`guacamole.wg.dphx.eu`)"
+#      - "traefik.http.routers.guacamole.entrypoints=websecure"
+#      - "traefik.http.routers.guacamole.tls.certresolver=letsencrypt"
+#      - "traefik.http.services.guacamole.loadbalancer.server.port=8080"
+#      - "traefik.http.routers.guacamole.middlewares=guacamole-prefix,guacamole-headers"
+#      - "traefik.http.middlewares.guacamole-prefix.addprefix.prefix=/guacamole"
+#      - "traefik.http.middlewares.guacamole-headers.headers.customrequestheaders.X-Forwarded-Proto=https"
 
   nextcloud:
     image: nextcloud:latest
