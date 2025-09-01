@@ -96,31 +96,15 @@ services:
       - "traefik.http.routers.nextcloud.tls.certresolver=letsencrypt"
       - "traefik.http.services.nextcloud.loadbalancer.server.port=80"
 
-  nextcloud_db:
+  shared_db:
     image: mariadb:10.5
-    container_name: nextcloud_db
+    container_name: shared_db
     restart: unless-stopped
     environment:
       - MYSQL_ROOT_PASSWORD=rootpass123
-      - MYSQL_DATABASE=nextcloud
-      - MYSQL_USER=nextcloud
-      - MYSQL_PASSWORD=nextpass123
     volumes:
-      - nextcloud_db_data:/var/lib/mysql
-    networks:
-      - proxy
-
-  guacamole_db:
-    image: mariadb:10.5
-    container_name: guacamole_db
-    restart: unless-stopped
-    environment:
-      - MYSQL_ROOT_PASSWORD=root_password
-      - MYSQL_DATABASE=guacamole_db
-      - MYSQL_USER=guacamole_user
-      - MYSQL_PASSWORD=guacamole_password
-    volumes:
-      - ./data/mysql:/var/lib/mysql
+      - shared_db_data:/var/lib/mysql
+      - ./data/mysql-init:/docker-entrypoint-initdb.d
     networks:
       - proxy
 
