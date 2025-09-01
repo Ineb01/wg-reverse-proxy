@@ -50,10 +50,10 @@ services:
     restart: unless-stopped
     depends_on:
       - guacd
-      - guacamole_db
+      - shared_db
     environment:
       - GUACD_HOSTNAME=guacd
-      - MYSQL_HOSTNAME=guacamole_db
+      - MYSQL_HOSTNAME=shared_db
       - MYSQL_PORT=3306
       - MYSQL_DATABASE=guacamole_db
       - MYSQL_USER=guacamole_user
@@ -81,12 +81,12 @@ services:
       - NEXTCLOUD_ADMIN_USER=admin
       - NEXTCLOUD_ADMIN_PASSWORD=changeme123
       - NEXTCLOUD_TRUSTED_DOMAINS=nextcloud.wg.dphx.eu
-      - MYSQL_HOST=nextcloud_db
+      - MYSQL_HOST=shared_db
       - MYSQL_DATABASE=nextcloud
       - MYSQL_USER=nextcloud
       - MYSQL_PASSWORD=nextpass123
     depends_on:
-      - nextcloud_db
+      - shared_db
     networks:
       - proxy
     labels:
@@ -114,4 +114,4 @@ networks:
 
 volumes:
   nextcloud_data:
-  nextcloud_db_data:
+  shared_db_data:
