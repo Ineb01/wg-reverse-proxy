@@ -10,16 +10,11 @@ services:
       - "443:443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./data/traefik/certificates:/etc/traefik/certificates
       - ./data/traefik/acme:/etc/traefik/acme
-      - ./data/traefik/config:/etc/traefik/config
     command:
-      - "--log.level=DEBUG"  # Enable debug logging
       - "--api.dashboard=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-      - "--providers.file.directory=/etc/traefik/config"
-      - "--providers.file.watch=true"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
@@ -30,6 +25,12 @@ services:
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
     labels:
       - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.wg.dphx.eu`)"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.middlewares=dashboard-auth"
+      - "traefik.http.middlewares.dashboard-auth.basicauth.users=admin:$$apr1$$0UwD3hxv$$IXdLckRXMYWZHG9dtuz8G."
 
   guacd:
     image: guacamole/guacd:1.6.0-RC1
@@ -45,21 +46,62 @@ services:
     restart: unless-stopped
     depends_on:
       - guacd
-      - mariadb
+      - guacamole_db
     environment:
       - GUACD_HOSTNAME=guacd
-      - MYSQL_HOSTNAME=mariadb
+      - MYSQL_HOSTNAME=guacamole_db
       - MYSQL_PORT=3306
       - MYSQL_DATABASE=guacamole_db
       - MYSQL_USER=guacamole_user
       - MYSQL_PASSWORD=guacamole_password
     labels:
       - "traefik.enable=true"
+      - "traefik.http.routers.guacamole.rule=Host(`guacamole.wg.dphx.eu`)"
+      - "traefik.http.routers.guacamole.entrypoints=websecure"
+      - "traefik.http.routers.guacamole.tls.certresolver=letsencrypt"
+      - "traefik.http.services.guacamole.loadbalancer.server.port=8080"
+      - "traefik.http.routers.guacamole.middlewares=guacamole-headers"
+      - "traefik.http.middlewares.guacamole-headers.headers.customrequestheaders.X-Forwarded-Proto=https"
 
+  nextcloud:
+    image: nextcloud:latest
+    container_name: nextcloud
+    restart: unless-stopped
+    volumes:
+      - nextcloud_data:/var/www/html
+      - /media/ineb01/External:/var/www/html/data/external:rw
+    environment:
+      - NEXTCLOUD_ADMIN_USER=admin
+      - NEXTCLOUD_ADMIN_PASSWORD=changeme123
+      - NEXTCLOUD_TRUSTED_DOMAINS=nextcloud.wg.dphx.eu
+      - MYSQL_HOST=nextcloud_db
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_PASSWORD=nextpass123
+    depends_on:
+      - nextcloud_db
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nextcloud.rule=Host(`nextcloud.wg.dphx.eu`)"
+      - "traefik.http.routers.nextcloud.entrypoints=websecure"
+      - "traefik.http.routers.nextcloud.tls.certresolver=letsencrypt"
+      - "traefik.http.services.nextcloud.loadbalancer.server.port=80"
 
-  mariadb:
+  nextcloud_db:
+    image: mariadb:latest
+    container_name: nextcloud_db
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpass123
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_PASSWORD=nextpass123
+    volumes:
+      - nextcloud_db_data:/var/lib/mysql
+
+  guacamole_db:
     image: mariadb:10.5
-    container_name: mariadb
+    container_name: guacamole_db
     restart: unless-stopped
     environment:
       - MYSQL_ROOT_PASSWORD=root_password
@@ -68,3 +110,7 @@ services:
       - MYSQL_PASSWORD=guacamole_password
     volumes:
       - ./data/mysql:/var/lib/mysql
+
+volumes:
+  nextcloud_data:
+  nextcloud_db_data:
