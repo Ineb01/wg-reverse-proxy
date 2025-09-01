@@ -97,7 +97,7 @@ services:
       - "traefik.http.services.nextcloud.loadbalancer.server.port=80"
 
   nextcloud_db:
-    image: mariadb:latest
+    image: mariadb:10.5
     container_name: nextcloud_db
     restart: unless-stopped
     environment:
